@@ -53,13 +53,13 @@ class App(ttk.Window):
 
     def submit_handler(self):
         if self.var.get() != "":
-            threading.Thread(target=self.link_shorten)
             self.label.place_forget()
             self.submit_btn.place_forget()
             self.entry.place_configure(rely=0.3)
             self.entry.configure(state="readonly")
             self.load.place(relx=0.5, rely=0.6, anchor="center")
             self.load_animate()
+            threading.Thread(target=self.link_shorten)
 
     def load_animate(self):
         if self.load and self.result_var.get() == "":
@@ -80,7 +80,7 @@ class App(ttk.Window):
         }
         payload = {"long_url": self.var}
         response = requests.post(self.endpoint, json=payload, headers=headers)
-        print(response.get("url"))
+        self.result_var.set(response.json().get("link"))
 
 
 if __name__ == "__main__":
