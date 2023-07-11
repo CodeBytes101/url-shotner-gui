@@ -14,17 +14,17 @@ def image_parser(path: str, size: tuple):
 class App(ttk.Window):
     def __init__(self, theme):
         super().__init__(themename=theme)
-        self.geometry("500x350")
-        self.maxsize(width=500, height=350)
-        self.minsize(width=500, height=350)
+        self.geometry("525x375")
+        self.maxsize(width=525, height=375)
+        self.minsize(width=525, height=375)
         self.title("URL-Shortener")
         self.iconbitmap("images\logo.ico")
         self.var = ttk.Variable(value="")
-        self.result_var = ttk.Variable()
+        self.result_var = ttk.Variable(value="")
         self.r = 0
-        self.btn_frame = ttk.Frame(self)
+        self.btn_frame = ttk.Frame(self, width=150, height=125)
         self.label_frame = ttk.Labelframe(
-            self, text="Short-URL", bootstyle="success", height=150, width=360
+            self, text="Short-URL", bootstyle="success", height=130, width=380
         )
         self.load_img = Image.open("images\loading.png").resize((25, 25))
         self.load = ctk.CTkLabel(
@@ -62,6 +62,7 @@ class App(ttk.Window):
             self.btn_frame,
             text="Reset",
             bootstyle="success-outline",
+            command=self.reset,
         )
         self.quit_btn = ttk.Button(
             self.btn_frame,
@@ -77,8 +78,8 @@ class App(ttk.Window):
             bootstyle="success",
             foreground="white",
         )
-        self.quit_btn.place(relx=0.45, rely=85, anchor="center")
-        self.reset_btn.place(relx=0.65, rely=0.85, anchor="center")
+        self.quit_btn.pack(side="left", pady=20)
+        self.reset_btn.pack(side="left", pady=20, padx=10)
         self.entry.place(relx=0.5, rely=0.5, anchor="center")
         self.entry.bind("<KeyRelease>", lambda _: self.create(_))
         self.mainloop()
@@ -93,6 +94,17 @@ class App(ttk.Window):
             threading.Thread(target=self.link_shorten).start()
             self.animate()
 
+    def reset(self):
+        self.result_var.set("")
+        self.var.set("")
+        self.btn_frame.place_forget()
+        self.label_frame.place_forget()
+        self.entry.configure(state="normal")
+        self.entry.place_configure(relx=0.5, rely=0.5, anchor="center")
+        self.label.place(relx=0.5, rely=0.35, anchor="center")
+        self.label_frame.configure(bootstyle="success", text="Short-URL")
+        self.result_label.configure(font=12, foreground="white")
+
     def animate(self):
         if self.load and self.result_var.get() == "":
             self.r -= 1.5
@@ -101,8 +113,8 @@ class App(ttk.Window):
 
         elif self.result_var.get() != "":
             self.load.place_forget()
-            self.label_frame.place(relx=0.5, rely=0.6, anchor="center")
-            self.result_label.place(relx=0.5, rely=0.38, anchor="center")
+            self.label_frame.place(relx=0.5, rely=0.5, anchor="center")
+            self.result_label.place(relx=0.5, rely=0.5, anchor="center")
             self.copy_btn.place(relx=0.95, rely=0.05, anchor="center")
             self.btn_frame.place(relx=0.5, rely=0.85, anchor="center")
 
@@ -121,7 +133,9 @@ class App(ttk.Window):
         if status != 200:
             self.label_frame.configure(bootstyle="warning", text="Error")
             self.result_label.configure(font=9, foreground="yellow")
-        self.result_var.set(response)
+            self.result_var.set("Enter a valid URL")
+        else:
+            self.result_var.set(response)
 
 
 if __name__ == "__main__":
