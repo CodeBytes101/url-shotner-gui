@@ -11,9 +11,10 @@ class App(ttk.Window):
         self.geometry("500x350")
         self.title("URL-Shortener")
         self.iconbitmap("images\logo.ico")
-        self.var = ttk.StringVar()
-        self.result_var = ttk.StringVar(value="")
+        self.var = ttk.Variable(value="")
+        self.result_var = ttk.Variable()
         self.r = 0
+        self.label_frame = ttk.Labelframe(self, text="Short-URL", bootstyle="success")
         self.load_img = Image.open("images\loading.png").resize((25, 25))
         self.load = ctk.CTkLabel(
             self, text="", image=ImageTk.PhotoImage(self.load_img.rotate(self.r))
@@ -25,8 +26,8 @@ class App(ttk.Window):
         self.entry = ttk.Entry(
             self,
             textvariable=self.var,
-            width=25,
-            font=("helvetica", 12, "italic"),
+            width=30,
+            font=("helvetica", 11, "italic"),
             foreground="white",
             bootstyle="success",
         )
@@ -42,11 +43,17 @@ class App(ttk.Window):
             bootstyle="success-outline",
         )
         self.quit_btn = ttk.Button(
-            self,
-            text="Quit",
-            bootstyle="danger-outline",
+            self, text="Quit", bootstyle="danger-outline", command=self.destroy
         )
-        self.result_label = ttk.Label(self, text="", textvariable=self.result_var)
+        self.result_label = ttk.Label(
+            self.label_frame,
+            text="",
+            font=("helvetica", 16, "italic"),
+            textvariable=self.result_var,
+            bootstyle="success",
+            border=3,
+            foreground="white",
+        )
         self.entry.place(relx=0.5, rely=0.5, anchor="center")
         self.entry.bind("<KeyRelease>", lambda _: self.create(_))
         self.mainloop()
@@ -58,17 +65,19 @@ class App(ttk.Window):
             self.entry.place_configure(rely=0.3)
             self.entry.configure(state="readonly")
             self.load.place(relx=0.5, rely=0.6, anchor="center")
-            self.load_animate()
-            threading.Thread(target=self.link_shorten)
+            threading.Thread(target=self.link_shorten).start()
+            self.animate()
 
-    def load_animate(self):
+    def animate(self):
         if self.load and self.result_var.get() == "":
             self.r -= 1.5
             self.load.configure(image=ImageTk.PhotoImage(self.load_img.rotate(self.r)))
             self.after(1, self.load_animate)
-        else:
+
+        elif self.result_var.get() != "":
             self.load.place_forget()
-            self.result_label.place(relx=0.5, rely=0.55, anchor="center")
+            self.label_frame.place(relx=0.5, rely=0.55, anchor="center")
+            self.result_label.place(relx=0.5, rely=0.5, anchor="center")
 
     def create(self, _):
         self.submit_btn.place(relx=0.5, rely=0.7, anchor="center")
@@ -78,9 +87,18 @@ class App(ttk.Window):
             "Authorization": f"Bearer {self.authentication}",
             "Content-Type": "application/json",
         }
-        payload = {"long_url": self.var}
+        payload = {"long_url": self.var.get()}
         response = requests.post(self.endpoint, json=payload, headers=headers)
-        self.result_var.set(response.json().get("link"))
+        status = response.status_code
+        response = response.json().get("link")
+
+        if status != 200:
+            self.label_frame.configure(text="Info", bootstyle="warning")
+            self.result_var.configure(color="Yellow")
+            self.result_var.set("Something Went Wrong")
+
+        else:
+            self.result_var.set(response)
 
 
 if __name__ == "__main__":

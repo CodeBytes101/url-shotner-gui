@@ -10,7 +10,7 @@ def link_shorten(url):
     response = requests.post(
         "https://api-ssl.bitly.com/v4/shorten", json=payload, headers=headers
     )
-    print(response.json().get("link"))
+    return response.status_code
 
 
-link_shorten("https://www.youtube.com/watch?v=ee5aEU4XEnc")
+print(link_shorten("https://www.youtube.com/watch?v=TOEzSvbxxn0"))
