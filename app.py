@@ -30,8 +30,8 @@ class App(ttk.Window):
         self.load = ctk.CTkLabel(
             self, text="", image=ImageTk.PhotoImage(self.load_img.rotate(self.r))
         )
-        self.endpoint = "https://api-ssl.bitly.com/v4/shorten"
-        self.authentication = "41dd6d539c0cb4b23d427a23ca9f992906073e02"
+        self.endpoint = "https://sizl.ink/api/url/add"
+        self.authentication = "HDZXieZcFnLtkNHk"
         self.label = ttk.Label(self, text="URL", font=("helvetica", 15, "italic"))
         self.label.place(relx=0.5, rely=0.35, anchor="center")
         self.entry = ttk.Entry(
@@ -126,14 +126,17 @@ class App(ttk.Window):
             "Authorization": f"Bearer {self.authentication}",
             "Content-Type": "application/json",
         }
-        payload = {"long_url": self.var.get()}
+        payload = {"url": self.var.get()}
         response = requests.post(self.endpoint, json=payload, headers=headers)
         status = response.status_code
-        response = response.json().get("link")
+        response = response.json().get("shorturl")
         if status != 200:
             self.label_frame.configure(bootstyle="warning", text="Error")
             self.result_label.configure(font=9, foreground="yellow")
-            self.result_var.set("Enter a valid URL")
+            if status == 403:
+                self.result_var.set("Forbidden Error")
+            else:
+                self.result_var.set("Enter a valid URL")
         else:
             self.result_var.set(response)
 
