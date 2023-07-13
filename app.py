@@ -2,6 +2,7 @@ import ttkbootstrap as ttk
 from PIL import Image, ImageTk
 import requests
 import threading
+from tkinter import ttk as tk
 import customtkinter as ctk
 import pyperclip
 
@@ -17,6 +18,36 @@ class App(ttk.Window):
         self.geometry("525x375")
         self.maxsize(width=525, height=375)
         self.minsize(width=525, height=375)
+        self.x = -0.4
+        threading.Thread(target=self.link_fetcher).start()
+        self.shorturls = []
+        self.toggle_frame = tk.Frame(self, height=325, width=240, bootstyle="dark")
+        self.table = ttk.Treeview(
+            self.toggle_frame, columns=("URL's"), show="headings", bootstyle="info"
+        )
+        self.table.heading("URL's", text="URL's")
+        self.back_btn = ctk.CTkButton(
+            self.toggle_frame,
+            text="",
+            image=image_parser(r"images\back.png", (18, 18)),
+            height=18,
+            fg_color="#0B5162",
+            width=15,
+            corner_radius=10,
+            command=self.animate_backward,
+        )
+        self.toggle_frame.place(relx=self.x, rely=0.52, anchor="center")
+        self.toggle_btn = ctk.CTkButton(
+            self,
+            text="",
+            image=image_parser("images\menu.png", (20, 20)),
+            fg_color="#002B36",
+            height=20,
+            width=20,
+            command=self.animate_forward,
+        )
+        self.toggle_btn.place(relx=0.05, rely=0.05, anchor="center")
+        self.table.place(relx=0.5, rely=0.53, anchor="center")
         self.title("URL-Shortener")
         self.iconbitmap("images\logo.ico")
         self.var = ttk.Variable(value="")
@@ -103,7 +134,7 @@ class App(ttk.Window):
         self.entry.place_configure(relx=0.5, rely=0.5, anchor="center")
         self.label.place(relx=0.5, rely=0.35, anchor="center")
         self.label_frame.configure(bootstyle="success", text="Short-URL")
-        self.result_label.configure(font=12, foreground="white")
+        self.result_label.configure(font=16, foreground="white")
 
     def animate(self):
         if self.load and self.result_var.get() == "":
@@ -131,14 +162,50 @@ class App(ttk.Window):
         status = response.status_code
         response = response.json().get("shorturl")
         if status != 200:
+            threading.Thread(target=self.link_fetcher).start()
             self.label_frame.configure(bootstyle="warning", text="Error")
             self.result_label.configure(font=9, foreground="yellow")
+
             if status == 403:
                 self.result_var.set("Forbidden Error")
             else:
                 self.result_var.set("Enter a valid URL")
         else:
             self.result_var.set(response)
+
+    def animate_forward(self):
+        self.toggle_btn.place_forget()
+        if self.x < 0.26:
+            self.x += 0.01
+            self.toggle_frame.lift()
+            self.toggle_frame.place(relx=self.x, rely=0.5, anchor="center")
+            self.after(1, self.animate_forward)
+        self.back_btn.place(relx=0.93, rely=0.06, anchor="center")
+
+    def animate_backward(self):
+        if self.x >= -0.4:
+            self.x -= 0.01
+            self.toggle_frame.place(relx=self.x, rely=0.5, anchor="center")
+            self.after(1, self.animate_backward)
+        self.back_btn.place_forget()
+        self.toggle_btn.place(relx=0.05, rely=0.05, anchor="center")
+
+    def link_fetcher(self):
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer HDZXieZcFnLtkNHk",
+        }
+        response = requests.get("https://sizl.ink/api/urls", headers=headers)
+        data = (response.json()).get("data").get("urls")
+        try:
+            self.shorturls = []
+            for i in data:
+                print(i.get("id"))
+                self.shorturls.append(i.get("shorturl"))
+            for i in self.shorturls:
+                self.table.insert("", index="end", values=(i))
+        except:
+            print("Error")
 
 
 if __name__ == "__main__":
