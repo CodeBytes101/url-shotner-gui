@@ -1,0 +1,5 @@
+ttkbootstrap
+pillow
+requests
+customtkinter
+pyperclip
