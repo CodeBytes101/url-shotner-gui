@@ -5,6 +5,7 @@ import threading
 from tkinter import ttk as tk
 import customtkinter as ctk
 import pyperclip
+import os
 
 
 def image_parser(path: str, size: tuple):
@@ -63,7 +64,7 @@ class App(ttk.Window):
             self, text="", image=ImageTk.PhotoImage(self.load_img.rotate(self.r))
         )
         self.endpoint = "https://sizl.ink/api/url/add"
-        self.authentication = "HDZXieZcFnLtkNHk"
+        self.authentication = os.environ.get("URL_TOKEN")
         self.label = ttk.Label(self, text="URL", font=("helvetica", 15, "italic"))
         self.label.place(relx=0.5, rely=0.35, anchor="center")
         self.entry = ttk.Entry(
@@ -168,9 +169,7 @@ class App(ttk.Window):
             self.result_label.configure(font=9, foreground="yellow")
 
             if status == 403:
-                self.result_var.set("Forbidden Error")
-            else:
-                self.result_var.set("Enter a valid URL")
+                self.result_var.set("Service Unavailable")
         else:
             self.result_var.set(response)
 
