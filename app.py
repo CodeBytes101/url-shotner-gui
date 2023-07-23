@@ -36,6 +36,7 @@ class App(ttk.Window):
             corner_radius=10,
             command=self.animate_backward,
         )
+        self.selected_url = ""
         self.toggle_frame.place(relx=self.x, rely=0.52, anchor="center")
         self.toggle_btn = ctk.CTkButton(
             self,
@@ -198,9 +199,7 @@ class App(ttk.Window):
         response = requests.get("https://sizl.ink/api/urls", headers=headers)
         data = (response.json()).get("data").get("urls")
         try:
-            self.shorturls = []
             for i in data:
-                print(i.get("id"))
                 self.shorturls.append(i.get("shorturl"))
             for i in self.shorturls:
                 self.table.insert("", index="end", values=(i))
