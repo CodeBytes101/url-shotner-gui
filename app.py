@@ -64,7 +64,9 @@ class App(ttk.Window):
             self, text="", image=ImageTk.PhotoImage(self.load_img.rotate(self.r))
         )
         self.endpoint = "https://sizl.ink/api/url/add"
-        self.authentication = os.environ.get("URL_TOKEN")
+        self.authentication = os.environ.get(
+            "URL_TOKEN"
+        )  # save your api key under the name of URLTOKEN into the system environment variables
         self.label = ttk.Label(self, text="URL", font=("helvetica", 15, "italic"))
         self.label.place(relx=0.5, rely=0.35, anchor="center")
         self.entry = ttk.Entry(
@@ -88,7 +90,7 @@ class App(ttk.Window):
         self.submit_btn = ttk.Button(
             self,
             text="Submit",
-            bootstyle="success-outline",
+            bootstyle="success-outline",  # type: ignore
             command=self.submit_handler,
         )
         self.reset_btn = ttk.Button(
@@ -100,7 +102,7 @@ class App(ttk.Window):
         self.quit_btn = ttk.Button(
             self.btn_frame,
             text="Quit",
-            bootstyle="danger-outline",
+            bootstyle="danger-outline",  # type: ignore
             command=self.destroy,
         )
         self.result_label = ttk.Label(
