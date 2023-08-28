@@ -116,7 +116,8 @@ class App(ttk.Window):
         self.quit_btn.pack(side="left", pady=20)
         self.reset_btn.pack(side="left", pady=20, padx=10)
         self.entry.place(relx=0.5, rely=0.5, anchor="center")
-        self.entry.bind("<KeyRelease>", lambda _: self.create(_))
+        self.entry.bind("<KeyRelease>", lambda _: self.submit_btn.place(relx=0.5, rely=0.7, anchor="center")
+)
         self.mainloop()
 
     def submit_handler(self, event=None):
@@ -152,9 +153,6 @@ class App(ttk.Window):
             self.result_label.place(relx=0.5, rely=0.5, anchor="center")
             self.copy_btn.place(relx=0.95, rely=0.05, anchor="center")
             self.btn_frame.place(relx=0.5, rely=0.85, anchor="center")
-
-    def create(self, _):
-        self.submit_btn.place(relx=0.5, rely=0.7, anchor="center")
 
     def link_shorten(self):
         headers = {
@@ -195,7 +193,7 @@ class App(ttk.Window):
     def link_fetcher(self):
         headers = {
             "Content-Type": "application/json",
-            "Authorization": "Bearer HDZXieZcFnLtkNHk",
+            "Authorization": f"Bearer {self.authentication}",
         }
         response = requests.get("https://sizl.ink/api/urls", headers=headers)
         data = (response.json()).get("data").get("urls")
